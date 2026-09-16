@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Futebol Art.</title>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#17212b;--muted:#66737f;--line:#dfe5ea;--accent:#1769e0;--accent2:#0f8b55;--danger:#c62828}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{background:#17212b;color:#fff;padding:18px max(18px,calc((100% - 1120px)/2));position:sticky;top:0;z-index:5}
+.brand{display:flex;justify-content:space-between;align-items:center}.brand h1{margin:0;font-size:22px}.brand span{font-size:12px;color:#cbd5df}
+nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:68px;z-index:4}
+.navin{max-width:1120px;margin:auto;display:flex;overflow:auto}.navin button{white-space:nowrap;border:0;background:none;color:var(--muted);padding:13px 16px;font-weight:700;cursor:pointer}.navin button.active{color:var(--accent);border-bottom:3px solid var(--accent)}
+main{max-width:1120px;margin:auto;padding:18px}.page{display:none}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:15px;box-shadow:0 2px 10px #00000009}
+h2{font-size:18px;margin:0 0 13px}.sub{color:var(--muted);font-size:13px;margin-top:-7px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.field label{display:block;font-size:12px;font-weight:800;color:#52606d;margin-bottom:5px}
+input,select,button{font:inherit;border-radius:9px;padding:10px;border:1px solid #d2d9e0}input,select{width:100%;background:#fff}
+button{cursor:pointer;background:var(--accent);color:#fff;border:0;font-weight:800}.secondary{background:#edf1f5;color:var(--ink)}.success{background:var(--accent2)}.danger{background:var(--danger)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.actions button{width:auto}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.stat{padding:14px;border:1px solid var(--line);border-radius:11px}.stat b{font-size:24px;display:block}.stat small{color:var(--muted)}
+.player{display:grid;grid-template-columns:1.8fr .8fr .7fr .65fr auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #edf0f2}.player:last-child{border-bottom:0}.presence{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700}.presence input{width:auto}
+.badge{display:inline-block;font-size:10px;font-weight:800;padding:3px 7px;border-radius:20px;background:#eef2f6;color:#4d5964}.teams{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:12px}.team{border:1px solid var(--line);border-radius:13px;padding:13px}.team h3{margin:0 0 4px}.team .meta{font-size:12px;color:var(--muted);margin-bottom:8px}.team ol{margin:0;padding-left:22px}.team li{margin:6px 0}.notice{padding:11px;border-radius:10px;font-size:13px;margin-bottom:12px}.ok{background:#edf8f1;border:1px solid #b9dfc7}.warn{background:#fff7e5;border:1px solid #ffd58c}
+.history-item{padding:12px 0;border-bottom:1px solid var(--line)}.history-item:last-child{border-bottom:0}.history-item b{display:block}.history-item small{color:var(--muted)}
+.empty{text-align:center;color:var(--muted);padding:25px}.hidden{display:none}.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.hidden{display:none}.modalBox{background:#fff;border-radius:18px;padding:22px;max-width:430px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.25)}.modalBox h3{margin:0 0 8px}.modalBox p{color:var(--muted);font-size:14px;line-height:1.45;margin:0 0 16px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}.player{grid-template-columns:1fr 1fr}.player button{grid-column:1/-1}.navin button{padding:12px 11px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div><h1>⚽ Futebol Art.</h1><span>Gestão de jogadores e sorteio equilibrado</span></div><span id="saveState">● salvo</span></div></header>
+<nav><div class="navin">
+<button class="tab active" data-page="inicio">Início</button><button class="tab" data-page="jogadores">Lista de Jogadores</button><button class="tab" data-page="partida">Nova Partida</button><button class="tab" data-page="resultado">Resultado</button><button class="tab" data-page="historico">Histórico</button>
+</div></nav>
+<main>
+<section id="inicio" class="page active">
+<div class="card"><h2>Fala, parceiro! 👊</h2><div class="sub">Seu painel do Futebol de Quinta.</div>
+<div class="stats"><div class="stat"><b id="sPlayers">0</b><small>Jogadores cadastrados</small></div><div class="stat"><b id="sActive">0</b><small>Ativos</small></div><div class="stat"><b id="sGames">0</b><small>Partidas salvas</small></div><div class="stat"><b id="sPresent">0</b><small>Presentes agora</small></div></div>
+<div class="actions"><button onclick="go('jogadores')">📋 Lista de Jogadores</button><button class="success" onclick="go('partida')">⚽ Nova Partida</button></div></div>
+<div class="card"><h2>Regras do sorteio</h2><ul><li>A quantidade de jogadores por time é definida na partida.</li><li>DEF, MEI e ATQ são considerados no equilíbrio.</li><li>Todos os jogadores são jogadores de linha: DEF, MEI e ATQ.</li><li>O sistema procura equilibrar nível e posições sem eliminar a aleatoriedade.</li><li>A lista pode ter mais de 60 jogadores; uma partida pode usar até 60.</li></ul></div>
+</section>
+
+<section id="jogadores" class="page">
+<div class="card"><h2>Lista de Jogadores</h2><div class="sub">Cadastre uma vez e use a lista em todas as quintas.</div>
+<div class="grid"><div class="field"><label>Nome</label><input id="newName" placeholder="Nome do jogador"></div><div class="field"><label>Posição</label><select id="newPos"><option>DEF</option><option>MEI</option><option>ATQ</option></select></div><div class="field"><label>Nível 0–5</label><input id="newRating" type="number" min="0" max="5" step=".1" value="3"></div></div>
+<div class="actions"><button onclick="add()">Adicionar jogador</button><button class="secondary" onclick="demo()">Preencher exemplo</button><button class="danger" onclick="wipe()">Apagar lista</button></div></div>
+<div class="card"><div id="playerList"></div></div>
+</section>
+
+<section id="partida" class="page">
+<div class="card"><h2>Nova Partida</h2><div class="sub">Defina quem está presente e como a rodada será montada.</div>
+<div class="grid"><div class="field"><label>Data</label><input id="gameDate" type="date"></div><div class="field"><label>Nº de times</label><input id="teamN" type="number" min="1" max="10" value="4"></div><div class="field"><label>Jogadores por time</label><input id="teamSize" type="number" min="1" max="20" value="6"></div><div class="field"><label>Reservas</label><input id="reserveN" type="number" min="0" max="59" value="0"></div></div>
+<div id="setupInfo" class="notice warn" style="margin-top:13px"></div>
+<div class="actions"><button class="success" onclick="draw()">🎲 Sortear Times</button><button class="secondary" onclick="selectAll(true)">Marcar todos</button><button class="secondary" onclick="selectAll(false)">Desmarcar todos</button></div>
+</div>
+<div class="card"><h2>Presença</h2><div id="attendance"></div></div>
+</section>
+
+<section id="resultado" class="page">
+<div class="card"><h2>Resultado do Sorteio</h2><div id="resultMsg" class="notice warn">Faça um sorteio em “Nova Partida”.</div><div id="teams" class="teams"></div>
+<div class="actions" id="resultActions" style="display:none"><button onclick="draw()">🔄 Sortear novamente</button><button class="success" onclick="saveGame()">💾 Salvar partida</button><button onclick="openShare()">📤 Compartilhar resultado</button></div></div>
+<div id="shareModal" class="modal hidden"><div class="modalBox"><h3>Compartilhar resultado</h3><p>Escolha o formato. Depois o iPhone abrirá a tela de compartilhamento para você escolher WhatsApp ou outro aplicativo.</p><div class="actions"><button onclick="shareResult('image')">🖼️ Imagem</button><button onclick="shareResult('pdf')">📄 PDF</button><button class="secondary" onclick="closeShare()">Cancelar</button></div></div></div>
+</section>
+
+<section id="historico" class="page">
+<div class="card"><h2>Histórico</h2><div id="history"></div></div>
+</section>
+</main>
+<script>
+const KEY='fq_v2_players', HKEY='fq_v2_history';
+let players=JSON.parse(localStorage.getItem(KEY)||'[]').map(p=>({...p,pos:['DEF','MEI','ATQ'].includes(p.pos)?p.pos:'DEF'})), history=JSON.parse(localStorage.getItem(HKEY)||'[]'), lastDraw=null;
+const $=id=>document.getElementById(id);
+function persist(){localStorage.setItem(KEY,JSON.stringify(players));localStorage.setItem(HKEY,JSON.stringify(history));renderAll();$('saveState').textContent='● salvo'}
+function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(page).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='partida')renderAttendance()}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.page));
+function add(){let name=$('newName').value.trim(),pos=$('newPos').value,r=Number($('newRating').value);if(!name)return alert('Digite o nome.');players.push({id:crypto.randomUUID(),name,pos,rating:Math.max(0,Math.min(5,r)),active:true,present:true});$('newName').value='';persist()}
+function update(id,f,v){let p=players.find(x=>x.id===id);if(!p)return;p[f]=f==='rating'?Number(v):v;persist()}
+function removeP(id){players=players.filter(p=>p.id!==id);persist()}
+function selectAll(v){players.forEach(p=>p.present=v);persist()}
+function wipe(){if(confirm('Apagar toda a lista de jogadores?')){players=[];persist()}}
+function demo(){if(players.length&& !confirm('Substituir a lista atual pelo exemplo?'))return;players=[];let names=['André','Bruno','Carlos','Daniel','Edu','Felipe','Gustavo','Henrique','Igor','João','Kaique','Lucas','Marcos','Nathan','Otávio','Paulo','Rafael','Samuel','Tiago','Ulisses','Victor','William','Yago','Zeca'];let pos=['DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ'];names.forEach((n,i)=>players.push({id:crypto.randomUUID(),name:n,pos:pos[i],rating:2+(i%7)*.5,active:true,present:true}));persist()}
+function renderPlayers(){$('playerList').innerHTML=players.length?players.map(p=>`<div class="player"><input value="${esc(p.name)}" onchange="update('${p.id}','name',this.value)"><select onchange="update('${p.id}','pos',this.value)">${['DEF','MEI','ATQ'].map(x=>`<option ${p.pos===x?'selected':''}>${x}</option>`).join('')}</select><input type="number" min="0" max="5" step=".1" value="${p.rating}" onchange="update('${p.id}','rating',this.value)"><label class="presence"><input type="checkbox" ${p.active?'checked':''} onchange="update('${p.id}','active',this.checked)"> Ativo</label><button class="danger" onclick="removeP('${p.id}')">Excluir</button></div>`).join(''):'<div class="empty">Nenhum jogador cadastrado.</div>'}
+function renderAttendance(){let active=players.filter(p=>p.active);$('attendance').innerHTML=active.length?active.map(p=>`<label class="presence" style="padding:9px 0;border-bottom:1px solid #edf0f2"><input type="checkbox" ${p.present?'checked':''} onchange="update('${p.id}','present',this.checked)"> ${esc(p.name)} <span class="badge">${p.pos} • ${p.rating.toFixed(1)}</span></label>`).join(''):'<div class="empty">Cadastre jogadores ativos primeiro.</div>';updateSetup()}
+function updateSetup(){let present=players.filter(p=>p.active&&p.present).length,n=Number($('teamN').value||0),size=Number($('teamSize').value||0),r=Number($('reserveN').value||0),need=n*size+r; $('setupInfo').innerHTML=`Presentes: <b>${present}</b> • Necessários: <b>${need}</b> (${n} times × ${size}) • ${present>=need?'Pronto para sortear.':'Faltam '+(need-present)+' jogador(es).'}`}
+$('teamN').oninput=updateSetup;$('teamSize').oninput=updateSetup;$('reserveN').oninput=updateSetup;
+function draw(){
+let n=Number($('teamN').value),size=Number($('teamSize').value),r=Number($('reserveN').value),pool=players.filter(p=>p.active&&p.present);
+if(n<1||n>10)return alert('Escolha entre 1 e 10 times.');
+if(size<1||size>20)return alert('Escolha entre 1 e 20 jogadores por time.');
+if(n*size+r>60)return alert('A partida pode usar no máximo 60 jogadores.');
+if(pool.length<n*size+r){go('partida');return alert(`São necessários ${n*size+r} presentes. Você marcou ${pool.length}.`)}
+/* O sorteio trabalha somente com jogadores de linha.
+   Primeiro reserva a quantidade pedida e depois procura a melhor combinação
+   possível para os times, priorizando tamanho, posições e equilíbrio de nível. */
+let best=null,bestCost=Infinity,bestReserves=[];
+for(let attempt=0;attempt<2200;attempt++){
+ let shuffled=shuffle(pool);
+ let starters=shuffled.slice(0,n*size);
+ let reservesTry=shuffled.slice(n*size,n*size+r);
+ let ts=Array.from({length:n},()=>[]);
+ let order=shuffle(starters).sort((a,b)=>b.rating-a.rating);
+ order.forEach(p=>{
+   let candidates=ts.map((t,j)=>({
+     j,
+     score:t.length*100 + count(t,p.pos)*18 + sum(t)*1.5 + Math.random()*8
+   })).sort((a,b)=>a.score-b.score);
+   ts[candidates[0].j].push(p);
+ });
+ if(ts.some(t=>t.length!==size))continue;
+ let av=ts.map(avg), spread=Math.max(...av)-Math.min(...av);
+ let posPenalty=0;
+ ts.forEach(t=>{
+   let counts=['DEF','MEI','ATQ'].map(x=>count(t,x));
+   posPenalty += (Math.max(...counts)-Math.min(...counts))*2;
+ });
+ let cost=spread*25 + posPenalty + Math.random()*1.5;
+ if(cost<bestCost){bestCost=cost;best=ts;bestReserves=reservesTry;}
+}
+if(!best){alert('Não foi possível montar os times com os jogadores presentes. Verifique a quantidade de jogadores.');return}
+teams=best;let reserves=bestReserves;
+lastDraw={date:$('gameDate').value||new Date().toISOString().slice(0,10),teams,reserves,config:{n,size,r}};
+renderResult();go('resultado')}
+function avg(t){return t.length?sum(t)/t.length:0}function sum(a){return a.reduce((s,p)=>s+p.rating,0)}function count(t,pos){return t.filter(p=>p.pos===pos).length}function shuffle(a){return a.slice().sort(()=>Math.random()-.5)}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function renderResult(){if(!lastDraw)return;$('resultMsg').className='notice ok';$('resultMsg').innerHTML=`${lastDraw.config.n} times • ${lastDraw.config.size} jogadores/time • ${lastDraw.reserves.length} reserva(s) • diferença entre médias: <b>${(Math.max(...lastDraw.teams.map(avg))-Math.min(...lastDraw.teams.map(avg))).toFixed(2)}</b>`;$('teams').innerHTML=lastDraw.teams.map((t,i)=>`<div class="team"><h3>Time ${i+1}</h3><div class="meta">Média ${avg(t).toFixed(2)} • DEF ${count(t,'DEF')} • MEI ${count(t,'MEI')} • ATQ ${count(t,'ATQ')}</div><ol>${t.map(p=>`<li>${esc(p.name)} <span class="badge">${p.pos}</span></li>`).join('')}</ol></div>`).join('')+(lastDraw.reserves.length?`<div class="team"><h3>🪑 Reservas</h3><ol>${lastDraw.reserves.map(p=>`<li>${esc(p.name)} <span class="badge">${p.pos}</span></li>`).join('')}</ol></div>`:'');$('resultActions').style.display='flex'}
+function openShare(){$('shareModal').classList.remove('hidden')}
+function closeShare(){$('shareModal').classList.add('hidden')}
+function shareTextLines(){let lines=[`FUTEBOL ART.`,`Data: ${new Date(lastDraw.date+'T12:00:00').toLocaleDateString('pt-BR')}`,``];lastDraw.teams.forEach((t,i)=>{lines.push(`TIME ${i+1}  •  Média ${avg(t).toFixed(2)}`);t.forEach((p,j)=>lines.push(`${j+1}. ${p.name} • ${p.pos}`));lines.push(``)});if(lastDraw.reserves.length){lines.push(`RESERVAS`);lastDraw.reserves.forEach((p,i)=>lines.push(`${i+1}. ${p.name} • ${p.pos}`))}return lines}
+function makeResultCanvas(){let lines=shareTextLines(),c=document.createElement('canvas'),ctx=c.getContext('2d'),pad=50,lineH=38,w=1100,h=pad*2+lines.length*lineH+30;c.width=w;c.height=h;ctx.fillStyle='#ffffff';ctx.fillRect(0,0,w,h);ctx.fillStyle='#111827';ctx.font='bold 42px -apple-system, BlinkMacSystemFont, Arial';ctx.fillText(lines[0],pad,65);ctx.font='22px -apple-system, BlinkMacSystemFont, Arial';ctx.fillStyle='#52606d';ctx.fillText(lines[1],pad,102);let y=155;for(let i=2;i<lines.length;i++){let line=lines[i];if(/^TIME \d/.test(line)||line==='RESERVAS'){ctx.font='bold 28px -apple-system, BlinkMacSystemFont, Arial';ctx.fillStyle='#1d4ed8';}else{ctx.font='22px -apple-system, BlinkMacSystemFont, Arial';ctx.fillStyle='#111827'}ctx.fillText(line,pad,y);y+=lineH}return c}
+function asciiPdfText(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^\x20-\x7E]/g,'?').replace(/([\\()])/g,'\\$1')}
+function makePdfBlob(){let lines=shareTextLines().map(asciiPdfText),width=595,height=842,margin=42,lineH=18,pageLines=Math.floor((height-70)/lineH),pages=[];for(let i=0;i<lines.length;i+=pageLines)pages.push(lines.slice(i,i+pageLines));let objs=[],kids=[];objs.push(null);objs.push('<< /Type /Pages /Kids [] /Count 0 >>');objs.push('<< /Type /Catalog /Pages 2 0 R >>');objs.push('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');let pageNums=[];pages.forEach((pg,pi)=>{let content='BT\n/F1 14 Tf\n';let y=height-50;pg.forEach((line,idx)=>{let size=(idx===0&&pi===0)?20:11;content+=`/F1 ${size} Tf\n1 0 0 1 ${margin} ${y} Tm (${line}) Tj\n`;y-=lineH});content+='ET';let streamObj=objs.length+1;objs.push(`<< /Length ${content.length} >>\nstream\n${content}\nendstream`);let pageObj=objs.length+1;objs.push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${width} ${height}] /Resources << /Font << /F1 4 0 R >> >> /Contents ${streamObj} 0 R >>`);pageNums.push(pageObj)});objs[1]=`<< /Type /Pages /Kids [${pageNums.map(n=>n+' 0 R').join(' ')}] /Count ${pageNums.length} >>`;let pdf='%PDF-1.4\n',offsets=[0];for(let i=1;i<objs.length;i++){offsets[i]=pdf.length;pdf+=`${i} 0 obj\n${objs[i]}\nendobj\n`}let xref=pdf.length;pdf+=`xref\n0 ${objs.length}\n0000000000 65535 f \n`;for(let i=1;i<objs.length;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';pdf+=`trailer\n<< /Size ${objs.length} /Root 3 0 R >>\nstartxref\n${xref}\n%%EOF`;return new Blob([pdf],{type:'application/pdf'})}
+async function shareResult(type){if(!lastDraw)return;closeShare();let file;if(type==='image'){let blob=await new Promise(resolve=>makeResultCanvas().toBlob(resolve,'image/png'));file=new File([blob],`futebol-de-quinta-${lastDraw.date}.png`,{type:'image/png'})}else{let blob=makePdfBlob();file=new File([blob],`futebol-de-quinta-${lastDraw.date}.pdf`,{type:'application/pdf'})}if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({title:'Futebol de Quinta',text:'Resultado do sorteio',files:[file]})}catch(e){if(e.name!=='AbortError')alert('Não foi possível abrir o compartilhamento.')} }else{let url=URL.createObjectURL(file),a=document.createElement('a');a.href=url;a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);alert('O compartilhamento de arquivos não está disponível neste navegador. O arquivo foi gerado para você salvar e compartilhar manualmente.')}}
+function saveGame(){if(!lastDraw)return;history.unshift({id:crypto.randomUUID(),date:lastDraw.date,teams:lastDraw.teams,reserves:lastDraw.reserves,config:lastDraw.config});history=history.slice(0,50);persist();alert('Partida salva no histórico!');go('historico')}
+function renderHistory(){$('history').innerHTML=history.length?history.map((g,i)=>`<div class="history-item"><b>⚽ ${new Date(g.date+'T12:00:00').toLocaleDateString('pt-BR')} — ${g.config.n} times × ${g.config.size||6}</b><small>${g.teams.flat().length} jogadores nos times • ${g.reserves.length} reserva(s)</small></div>`).join(''):'<div class="empty">Nenhuma partida salva ainda.</div>'}
+function renderAll(){renderPlayers();renderAttendance();renderHistory();$('sPlayers').textContent=players.length;$('sActive').textContent=players.filter(p=>p.active).length;$('sGames').textContent=history.length;$('sPresent').textContent=players.filter(p=>p.active&&p.present).length}
+$('gameDate').value=new Date().toISOString().slice(0,10);renderAll();
+</script>
+</body></html>
