@@ -36,12 +36,12 @@ button{cursor:pointer;background:var(--accent);color:#fff;border:0;font-weight:8
 <div class="card"><h2>Fala, parceiro! 👊</h2><div class="sub">Seu painel do Futebol de Quinta.</div>
 <div class="stats"><div class="stat"><b id="sPlayers">0</b><small>Jogadores cadastrados</small></div><div class="stat"><b id="sActive">0</b><small>Ativos</small></div><div class="stat"><b id="sGames">0</b><small>Partidas salvas</small></div><div class="stat"><b id="sPresent">0</b><small>Presentes agora</small></div></div>
 <div class="actions"><button onclick="go('jogadores')">📋 Lista de Jogadores</button><button class="success" onclick="go('partida')">⚽ Nova Partida</button></div></div>
-<div class="card"><h2>Regras do sorteio</h2><ul><li>6 jogadores por time.</li><li>DEF, MEI e ATQ são considerados no equilíbrio.</li><li>GOL é tratado separadamente do cálculo dos jogadores de linha.</li><li>O sistema procura equilibrar nível e posições sem eliminar a aleatoriedade.</li><li>A lista pode ter mais de 60 jogadores; uma partida pode usar até 60.</li></ul></div>
+<div class="card"><h2>Regras do sorteio</h2><ul><li>6 jogadores por time.</li><li>DEF, MEI e ATQ são considerados no equilíbrio.</li><li>Todos os jogadores são jogadores de linha: DEF, MEI e ATQ.</li><li>O sistema procura equilibrar nível e posições sem eliminar a aleatoriedade.</li><li>A lista pode ter mais de 60 jogadores; uma partida pode usar até 60.</li></ul></div>
 </section>
 
 <section id="jogadores" class="page">
 <div class="card"><h2>Lista de Jogadores</h2><div class="sub">Cadastre uma vez e use a lista em todas as quintas.</div>
-<div class="grid"><div class="field"><label>Nome</label><input id="newName" placeholder="Nome do jogador"></div><div class="field"><label>Posição</label><select id="newPos"><option>DEF</option><option>MEI</option><option>ATQ</option><option>GOL</option></select></div><div class="field"><label>Nível 0–5</label><input id="newRating" type="number" min="0" max="5" step=".1" value="3"></div></div>
+<div class="grid"><div class="field"><label>Nome</label><input id="newName" placeholder="Nome do jogador"></div><div class="field"><label>Posição</label><select id="newPos"><option>DEF</option><option>MEI</option><option>ATQ</option></select></div><div class="field"><label>Nível 0–5</label><input id="newRating" type="number" min="0" max="5" step=".1" value="3"></div></div>
 <div class="actions"><button onclick="add()">Adicionar jogador</button><button class="secondary" onclick="demo()">Preencher exemplo</button><button class="danger" onclick="wipe()">Apagar lista</button></div></div>
 <div class="card"><div id="playerList"></div></div>
 </section>
@@ -66,7 +66,7 @@ button{cursor:pointer;background:var(--accent);color:#fff;border:0;font-weight:8
 </main>
 <script>
 const KEY='fq_v2_players', HKEY='fq_v2_history';
-let players=JSON.parse(localStorage.getItem(KEY)||'[]'), history=JSON.parse(localStorage.getItem(HKEY)||'[]'), lastDraw=null;
+let players=JSON.parse(localStorage.getItem(KEY)||'[]').map(p=>({...p,pos:['DEF','MEI','ATQ'].includes(p.pos)?p.pos:'DEF'})), history=JSON.parse(localStorage.getItem(HKEY)||'[]'), lastDraw=null;
 const $=id=>document.getElementById(id);
 function persist(){localStorage.setItem(KEY,JSON.stringify(players));localStorage.setItem(HKEY,JSON.stringify(history));renderAll();$('saveState').textContent='● salvo'}
 function go(page){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(page).classList.add('active');document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.page===page));if(page==='partida')renderAttendance()}
@@ -77,7 +77,7 @@ function removeP(id){players=players.filter(p=>p.id!==id);persist()}
 function selectAll(v){players.forEach(p=>p.present=v);persist()}
 function wipe(){if(confirm('Apagar toda a lista de jogadores?')){players=[];persist()}}
 function demo(){if(players.length&& !confirm('Substituir a lista atual pelo exemplo?'))return;players=[];let names=['André','Bruno','Carlos','Daniel','Edu','Felipe','Gustavo','Henrique','Igor','João','Kaique','Lucas','Marcos','Nathan','Otávio','Paulo','Rafael','Samuel','Tiago','Ulisses','Victor','William','Yago','Zeca'];let pos=['DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ','DEF','MEI','ATQ'];names.forEach((n,i)=>players.push({id:crypto.randomUUID(),name:n,pos:pos[i],rating:2+(i%7)*.5,active:true,present:true}));persist()}
-function renderPlayers(){$('playerList').innerHTML=players.length?players.map(p=>`<div class="player"><input value="${esc(p.name)}" onchange="update('${p.id}','name',this.value)"><select onchange="update('${p.id}','pos',this.value)">${['DEF','MEI','ATQ','GOL'].map(x=>`<option ${p.pos===x?'selected':''}>${x}</option>`).join('')}</select><input type="number" min="0" max="5" step=".1" value="${p.rating}" onchange="update('${p.id}','rating',this.value)"><label class="presence"><input type="checkbox" ${p.active?'checked':''} onchange="update('${p.id}','active',this.checked)"> Ativo</label><button class="danger" onclick="removeP('${p.id}')">Excluir</button></div>`).join(''):'<div class="empty">Nenhum jogador cadastrado.</div>'}
+function renderPlayers(){$('playerList').innerHTML=players.length?players.map(p=>`<div class="player"><input value="${esc(p.name)}" onchange="update('${p.id}','name',this.value)"><select onchange="update('${p.id}','pos',this.value)">${['DEF','MEI','ATQ'].map(x=>`<option ${p.pos===x?'selected':''}>${x}</option>`).join('')}</select><input type="number" min="0" max="5" step=".1" value="${p.rating}" onchange="update('${p.id}','rating',this.value)"><label class="presence"><input type="checkbox" ${p.active?'checked':''} onchange="update('${p.id}','active',this.checked)"> Ativo</label><button class="danger" onclick="removeP('${p.id}')">Excluir</button></div>`).join(''):'<div class="empty">Nenhum jogador cadastrado.</div>'}
 function renderAttendance(){let active=players.filter(p=>p.active);$('attendance').innerHTML=active.length?active.map(p=>`<label class="presence" style="padding:9px 0;border-bottom:1px solid #edf0f2"><input type="checkbox" ${p.present?'checked':''} onchange="update('${p.id}','present',this.checked)"> ${esc(p.name)} <span class="badge">${p.pos} • ${p.rating.toFixed(1)}</span></label>`).join(''):'<div class="empty">Cadastre jogadores ativos primeiro.</div>';updateSetup()}
 function updateSetup(){let present=players.filter(p=>p.active&&p.present).length,n=Number($('teamN').value||0),r=Number($('reserveN').value||0),need=n*6+r; $('setupInfo').innerHTML=`Presentes: <b>${present}</b> • Necessários: <b>${need}</b> • ${present>=need?'Pronto para sortear.':'Faltam '+(need-present)+' jogador(es).'}`}
 $('teamN').oninput=updateSetup;$('reserveN').oninput=updateSetup;
@@ -86,31 +86,39 @@ let n=Number($('teamN').value),r=Number($('reserveN').value),pool=players.filter
 if(n<1||n>10)return alert('Escolha entre 1 e 10 times.');
 if(n*6+r>60)return alert('A partida pode usar no máximo 60 jogadores.');
 if(pool.length<n*6+r){go('partida');return alert(`São necessários ${n*6+r} presentes. Você marcou ${pool.length}.`)}
-let teams=Array.from({length:n},()=>[]), available=pool.map(p=>({...p}));
-let gols=shuffle(available.filter(p=>p.pos==='GOL')), line=shuffle(available.filter(p=>p.pos!=='GOL'));
-/* O algoritmo usa várias tentativas e uma função de custo: tamanho, distribuição de posição e diferença de nível. */
-let best=null,bestCost=Infinity;
-for(let attempt=0;attempt<1800;attempt++){
+/* O sorteio trabalha somente com jogadores de linha.
+   Primeiro reserva a quantidade pedida e depois procura a melhor combinação
+   possível para os times, priorizando tamanho, posições e equilíbrio de nível. */
+let best=null,bestCost=Infinity,bestReserves=[];
+for(let attempt=0;attempt<2200;attempt++){
+ let shuffled=shuffle(pool);
+ let starters=shuffled.slice(0,n*6);
+ let reservesTry=shuffled.slice(n*6,n*6+r);
  let ts=Array.from({length:n},()=>[]);
- let order=shuffle(line).sort((a,b)=>b.rating-a.rating);
- // distribui em serpentina para reduzir concentração de notas
- order.forEach((p,i)=>{let round=Math.floor(i/n), idx=round%2===0?i%n:n-1-(i%n);let candidates=ts.map((t,j)=>({j,score:t.length*9+count(t,p.pos)*2+sum(t)*.35+Math.random()*2})).sort((a,b)=>a.score-b.score);ts[candidates[0].j].push(p)});
- // insere goleiros em times com menor carga
- gols.slice(0,n).forEach((g,i)=>ts[i].push(g));
- // se algum time exceder, tentativa inválida; completa com trocas
+ let order=shuffle(starters).sort((a,b)=>b.rating-a.rating);
+ order.forEach(p=>{
+   let candidates=ts.map((t,j)=>({
+     j,
+     score:t.length*100 + count(t,p.pos)*18 + sum(t)*1.5 + Math.random()*8
+   })).sort((a,b)=>a.score-b.score);
+   ts[candidates[0].j].push(p);
+ });
  if(ts.some(t=>t.length!==6))continue;
- let av=ts.map(avgLine), spread=Math.max(...av)-Math.min(...av);
+ let av=ts.map(avg), spread=Math.max(...av)-Math.min(...av);
  let posPenalty=0;
- ts.forEach(t=>{let counts=['DEF','MEI','ATQ'].map(x=>count(t,x));posPenalty+=Math.max(...counts)-Math.min(...counts)*.25});
- let cost=spread*18+posPenalty+Math.random()*0.8;
- if(cost<bestCost){bestCost=cost;best=ts}
+ ts.forEach(t=>{
+   let counts=['DEF','MEI','ATQ'].map(x=>count(t,x));
+   posPenalty += (Math.max(...counts)-Math.min(...counts))*2;
+ });
+ let cost=spread*25 + posPenalty + Math.random()*1.5;
+ if(cost<bestCost){bestCost=cost;best=ts;bestReserves=reservesTry;}
 }
-if(!best){alert('Não encontrei uma combinação válida com esta configuração. Tente ajustar posições/goleiros.');return}
-teams=best;let used=new Set(teams.flat().map(p=>p.id)),remaining=pool.filter(p=>!used.has(p.id)),reserves=remaining.slice(0,r);
+if(!best){alert('Não foi possível montar os times com os jogadores presentes. Verifique a quantidade de jogadores.');return}
+teams=best;let reserves=bestReserves;
 lastDraw={date:$('gameDate').value||new Date().toISOString().slice(0,10),teams,reserves,config:{n,r}};
 renderResult();go('resultado')}
-function avg(t){let a=t.filter(p=>p.pos!=='GOL');return a.length?sum(a)/a.length:0}function sum(a){return a.reduce((s,p)=>s+p.rating,0)}function count(t,pos){return t.filter(p=>p.pos===pos).length}function shuffle(a){return a.slice().sort(()=>Math.random()-.5)}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
-function renderResult(){if(!lastDraw)return;$('resultMsg').className='notice ok';$('resultMsg').innerHTML=`${lastDraw.config.n} times • ${lastDraw.reserves.length} reserva(s) • diferença entre médias: <b>${(Math.max(...lastDraw.teams.map(avg))-Math.min(...lastDraw.teams.map(avg))).toFixed(2)}</b>`;$('teams').innerHTML=lastDraw.teams.map((t,i)=>`<div class="team"><h3>Time ${i+1}</h3><div class="meta">Média ${avg(t).toFixed(2)} • DEF ${count(t,'DEF')} • MEI ${count(t,'MEI')} • ATQ ${count(t,'ATQ')} • GOL ${count(t,'GOL')}</div><ol>${t.map(p=>`<li>${esc(p.name)} <span class="badge">${p.pos} • ${p.rating.toFixed(1)}</span></li>`).join('')}</ol></div>`).join('')+(lastDraw.reserves.length?`<div class="team"><h3>🪑 Reservas</h3><ol>${lastDraw.reserves.map(p=>`<li>${esc(p.name)} <span class="badge">${p.pos} • ${p.rating.toFixed(1)}</span></li>`).join('')}</ol></div>`:'');$('resultActions').style.display='flex'}
+function avg(t){return t.length?sum(t)/t.length:0}function sum(a){return a.reduce((s,p)=>s+p.rating,0)}function count(t,pos){return t.filter(p=>p.pos===pos).length}function shuffle(a){return a.slice().sort(()=>Math.random()-.5)}function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function renderResult(){if(!lastDraw)return;$('resultMsg').className='notice ok';$('resultMsg').innerHTML=`${lastDraw.config.n} times • ${lastDraw.reserves.length} reserva(s) • diferença entre médias: <b>${(Math.max(...lastDraw.teams.map(avg))-Math.min(...lastDraw.teams.map(avg))).toFixed(2)}</b>`;$('teams').innerHTML=lastDraw.teams.map((t,i)=>`<div class="team"><h3>Time ${i+1}</h3><div class="meta">Média ${avg(t).toFixed(2)} • DEF ${count(t,'DEF')} • MEI ${count(t,'MEI')} • ATQ ${count(t,'ATQ')}</div><ol>${t.map(p=>`<li>${esc(p.name)} <span class="badge">${p.pos} • ${p.rating.toFixed(1)}</span></li>`).join('')}</ol></div>`).join('')+(lastDraw.reserves.length?`<div class="team"><h3>🪑 Reservas</h3><ol>${lastDraw.reserves.map(p=>`<li>${esc(p.name)} <span class="badge">${p.pos} • ${p.rating.toFixed(1)}</span></li>`).join('')}</ol></div>`:'');$('resultActions').style.display='flex'}
 function saveGame(){if(!lastDraw)return;history.unshift({id:crypto.randomUUID(),date:lastDraw.date,teams:lastDraw.teams,reserves:lastDraw.reserves,config:lastDraw.config});history=history.slice(0,50);persist();alert('Partida salva no histórico!');go('historico')}
 function renderHistory(){$('history').innerHTML=history.length?history.map((g,i)=>`<div class="history-item"><b>⚽ ${new Date(g.date+'T12:00:00').toLocaleDateString('pt-BR')} — ${g.config.n} times</b><small>${g.teams.flat().length} jogadores nos times • ${g.reserves.length} reserva(s)</small></div>`).join(''):'<div class="empty">Nenhuma partida salva ainda.</div>'}
 function renderAll(){renderPlayers();renderAttendance();renderHistory();$('sPlayers').textContent=players.length;$('sActive').textContent=players.filter(p=>p.active).length;$('sGames').textContent=history.length;$('sPresent').textContent=players.filter(p=>p.active&&p.present).length}
